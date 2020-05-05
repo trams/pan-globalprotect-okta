@@ -121,7 +121,16 @@ def load_conf(cf):
 	if len(conf.get('username', '').strip()) == 0:
 		conf['username'] = input('username: ').strip()
 	if len(conf.get('password', '').strip()) == 0:
-		conf['password'] = getpass.getpass('password: ').strip()
+		password = None
+		try:
+			import keyring
+			password = keyring.get_password('okta', conf['username'])
+		except ImportError:
+			pass
+		if password:
+			conf['password'] = password
+		else:
+			conf['password'] = getpass.getpass('password: ').strip()
 	for k in keys:
 		if k not in conf:
 			err('missing configuration key: {0}'.format(k))
